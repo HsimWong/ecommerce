@@ -1,2 +1,5 @@
 binaries*
 *vscode*
+.vscode-ctags
+*app*
+log

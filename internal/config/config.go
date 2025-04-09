@@ -32,10 +32,12 @@ func initConfig(configName, configType, filepath string) {
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
+		panic(err)
 	}
 
 	if err := viper.Unmarshal(&AppConfig); err != nil {
 		log.Fatalf("Unable to decode into struct, %v", err)
+		panic(err)
 	}
 }
 
