@@ -25,10 +25,9 @@ type Config struct {
 var AppConfig Config
 var once sync.Once
 
-func initConfig(configName, configType, filepath string) {
-	viper.SetConfigName(configName) // 配置文件名 (不带扩展名)
+func initConfig(configfile, configType string) {
+	viper.SetConfigFile(configfile) // 配置文件名 ()
 	viper.SetConfigType(configType) // 配置文件类型
-	viper.AddConfigPath(filepath)   // 配置文件路径
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
@@ -43,7 +42,7 @@ func initConfig(configName, configType, filepath string) {
 
 func Configure() *Config {
 	once.Do(func() {
-		initConfig(configName, configType, configFilePath)
+		initConfig(configFile, configType)
 	})
 	return &AppConfig
 }
