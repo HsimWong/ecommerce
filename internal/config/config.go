@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -14,7 +16,7 @@ type Config struct {
 	}
 	Database struct {
 		Host     string
-		Port     string
+		Port     int
 		Username string
 		Password string
 		Dbname   string
@@ -38,11 +40,25 @@ func initConfig(configfile, configType string) {
 		log.Fatalf("Unable to decode into struct, %v", err)
 		panic(err)
 	}
+	// 特别处理密码，优先从环境变量获取
+	if viper.GetString("database.postgres.password") == "${DB_PASSWORD}" {
+		if pwd := os.Getenv("DB_PASSWORD"); pwd != "" {
+			viper.Set("database.postgres.password", pwd)
+		} else {
+			panic(fmt.Errorf("DB_PASSWORD environment variable is required"))
+		}
+	}
 }
 
-func Configure() *Config {
+func Configure(configPath ...string) *Config {
 	once.Do(func() {
-		initConfig(configFile, configType)
+		initConfig(func() string {
+			if len(configPath) <= 0 {
+				return configFile
+			} else {
+				return configPath[0]
+			}
+		}(), configType)
 	})
 	return &AppConfig
 }

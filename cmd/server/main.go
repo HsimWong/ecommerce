@@ -11,5 +11,7 @@ func main() {
 	logger.Log().Debug("Server will be started started at ",
 		zap.String("ServerAddr", appConfig.Server.Addr),
 		zap.Int("ServerPort", appConfig.Server.Port),
+		zap.String("dbhost", appConfig.Database.Host),
+		zap.Int("dbport", appConfig.Database.Port),
 	)
 }
