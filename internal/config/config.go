@@ -9,10 +9,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type ServerMode string
+
+const (
+	SERVER_MODE_RELEASE ServerMode = "release"
+	SERVER_MODE_DEBUG   ServerMode = "debug"
+	SERVER_MODE_TEST    ServerMode = "test"
+)
+
+type Configuration struct {
 	Server struct {
 		Addr string
 		Port int
+		Mode ServerMode
 	}
 	Database struct {
 		Host     string
@@ -24,7 +33,8 @@ type Config struct {
 }
 
 // Singleton config
-var AppConfig Config
+var AppConfig *Configuration
+var configuredFlag bool = false
 var once sync.Once
 
 func initConfig(configfile, configType string) {
@@ -35,8 +45,8 @@ func initConfig(configfile, configType string) {
 		log.Fatalf("Error reading config file, %s", err)
 		panic(err)
 	}
-
-	if err := viper.Unmarshal(&AppConfig); err != nil {
+	AppConfig = &Configuration{}
+	if err := viper.Unmarshal(AppConfig); err != nil {
 		log.Fatalf("Unable to decode into struct, %v", err)
 		panic(err)
 	}
@@ -50,7 +60,7 @@ func initConfig(configfile, configType string) {
 	}
 }
 
-func Configure(configPath ...string) *Config {
+func Config(configPath ...string) *Configuration {
 	once.Do(func() {
 		initConfig(func() string {
 			if len(configPath) <= 0 {
@@ -59,6 +69,8 @@ func Configure(configPath ...string) *Config {
 				return configPath[0]
 			}
 		}(), configType)
+		configuredFlag = true
 	})
-	return &AppConfig
+
+	return AppConfig
 }

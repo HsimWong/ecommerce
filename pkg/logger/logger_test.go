@@ -12,7 +12,7 @@ import (
 )
 
 func TestLogger(m *testing.T) {
-	config.Configure("../../configs/config.yaml")
+	config.Config("../../configs/config.yaml")
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
