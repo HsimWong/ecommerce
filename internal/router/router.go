@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/HsimWong/ecommerce/internal/api"
 	"github.com/HsimWong/ecommerce/internal/config"
 	"github.com/HsimWong/ecommerce/pkg/logger"
 	"github.com/gin-gonic/gin"
@@ -16,13 +17,34 @@ type Router struct {
 	apiGroup *gin.RouterGroup
 }
 
+func (rt *Router) init() {
+	rt.r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "OK"})
+	})
+
+	apiGroup := rt.r.Group("/api/v1")
+
+	// Grouping codes logically
+	{
+		userGroup := apiGroup.Group("/user")
+		userHandler := api.NewUserAPIHandler()
+		userGroup.POST("/register", userHandler.Register)
+	}
+
+	rt.apiGroup = apiGroup
+}
+
 func NewRouter(serverMode config.ServerMode) *Router {
+	logger.Log()
 	gin.SetMode(map[config.ServerMode]string{
 		config.SERVER_MODE_RELEASE: gin.ReleaseMode,
 		config.SERVER_MODE_DEBUG:   gin.DebugMode,
 		config.SERVER_MODE_TEST:    gin.TestMode,
 	}[serverMode])
+
 	r := gin.New()
+	r.SetTrustedProxies([]string{"192.168.0.0/16", "10.0.0.0/8"})
+
 	r.Use(gin.CustomRecovery(func(c *gin.Context, err interface{}) {
 		logger.Log().Error("HTTP Panic",
 			zap.Any("error", err),
@@ -45,16 +67,11 @@ func NewRouter(serverMode config.ServerMode) *Router {
 			zap.String("client_ip", c.ClientIP()))
 	})
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "OK"})
-	})
-
-	apiGroup := r.Group("/api/v1")
-
-	return &Router{
-		r:        r,
-		apiGroup: apiGroup,
+	rt := &Router{
+		r: r,
 	}
+	rt.init()
+	return rt
 }
 
 func (r *Router) Run() {
@@ -70,8 +87,9 @@ func (r *Router) Run() {
 
 	if err := r.r.Run(fmt.Sprintf("%s:%d", cfg.Server.Addr, cfg.Server.Port)); err != nil {
 		logger.Log().Fatal("HTTP Server failed",
-			zap.String("EndTime", time.Now().String()),
-			zap.String("Duration", time.Since(start).String()),
+			zap.Time("EndTime", time.Now()),
+			zap.Duration("Duration", time.Since(start)),
 		)
 	}
+
 }
