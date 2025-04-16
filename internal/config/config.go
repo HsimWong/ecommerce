@@ -18,23 +18,27 @@ const (
 	SERVER_MODE_TEST    ServerMode = "test"
 )
 
+type Database struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	Dbname   string
+}
+
+type Server struct {
+	Addr string
+	Port int
+	Mode ServerMode
+}
+
 type Configuration struct {
-	Server struct {
-		Addr string
-		Port int
-		Mode ServerMode
-	}
-	Database struct {
-		Host     string
-		Port     int
-		Username string
-		Password string
-		Dbname   string
-	}
+	server   Server
+	database Database
 }
 
 // Singleton config
-var AppConfig *Configuration
+var appConfig *Configuration
 var once sync.Once
 
 func initConfig(configfile, configType string) {
@@ -45,11 +49,7 @@ func initConfig(configfile, configType string) {
 		log.Fatalf("Error reading config file, %s", err)
 		panic(err)
 	}
-	AppConfig = &Configuration{}
-	if err := viper.Unmarshal(AppConfig); err != nil {
-		log.Fatalf("Unable to decode into struct, %v", err)
-		panic(err)
-	}
+
 	// 特别处理密码，优先从环境变量获取
 	if viper.GetString("database.postgres.password") == "${DB_PASSWORD}" {
 		if pwd := os.Getenv("DB_PASSWORD"); pwd != "" {
@@ -58,16 +58,39 @@ func initConfig(configfile, configType string) {
 			panic(fmt.Errorf("DB_PASSWORD environment variable is required"))
 		}
 	}
+
+	// Important! using indirect assertion to avoid
+	// pointer value change from outside
+	tmpConfig := &struct {
+		Server
+		Database
+	}{}
+	if err := viper.Unmarshal(tmpConfig); err != nil {
+		log.Fatalf("Unable to decode into struct, %v", err)
+		panic(err)
+	}
+	appConfig = &Configuration{
+		server:   tmpConfig.Server,
+		database: tmpConfig.Database,
+	}
 }
 
 func assert(condition bool) { utils.Assert(condition) }
 
 func (conf *Configuration) Validate() {
-	assert(len(conf.Server.Addr) > 0)
-	assert(conf.Server.Port <= 65535)
-	assert(len(conf.Database.Dbname) > 0)
-	assert(len(conf.Database.Host) > 0)
-	assert(conf.Database.Port < 65535)
+	assert(len(conf.server.Addr) > 0)
+	assert(conf.server.Port <= 65535 && conf.server.Port > 0)
+	assert(len(conf.database.Dbname) > 0)
+	assert(len(conf.database.Host) > 0)
+	assert(conf.database.Port <= 65535 && conf.database.Port > 0)
+}
+
+func (conf *Configuration) GetDBConfig() Database {
+	return conf.database
+}
+
+func (conf *Configuration) GetServerConfig() Server {
+	return conf.server
 }
 
 func Config(configPath ...string) *Configuration {
@@ -81,5 +104,5 @@ func Config(configPath ...string) *Configuration {
 		}(), configType)
 	})
 
-	return AppConfig
+	return appConfig
 }

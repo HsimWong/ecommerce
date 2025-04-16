@@ -82,10 +82,10 @@ func (r *Router) Run() {
 	}
 
 	logger.Log().Info("Trying to start HTTP Server",
-		zap.String("ServerAddr", cfg.Server.Addr),
-		zap.Int("ServerPort", cfg.Database.Port))
+		zap.String("ServerAddr", cfg.GetServerConfig().Addr),
+		zap.Int("ServerPort", cfg.GetServerConfig().Port))
 
-	if err := r.r.Run(fmt.Sprintf("%s:%d", cfg.Server.Addr, cfg.Server.Port)); err != nil {
+	if err := r.r.Run(fmt.Sprintf("%s:%d", cfg.GetServerConfig().Addr, cfg.GetServerConfig().Port)); err != nil {
 		logger.Log().Fatal("HTTP Server failed",
 			zap.Time("EndTime", time.Now()),
 			zap.Duration("Duration", time.Since(start)),

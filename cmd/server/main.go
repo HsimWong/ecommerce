@@ -9,12 +9,13 @@ import (
 
 func main() {
 	appConfig := config.Config()
+	// appConfig.GetServerConfig().Port = 6060
 	appConfig.Validate()
 	logger.Log().Debug("Server will be started started at ",
-		zap.String("ServerAddr", appConfig.Server.Addr),
-		zap.Int("ServerPort", appConfig.Server.Port),
-		zap.String("dbhost", appConfig.Database.Host),
-		zap.Int("dbport", appConfig.Database.Port),
+		zap.String("ServerAddr", appConfig.GetServerConfig().Addr),
+		zap.Int("ServerPort", appConfig.GetServerConfig().Port),
+		zap.String("dbhost", appConfig.GetDBConfig().Host),
+		zap.Int("dbport", appConfig.GetDBConfig().Port),
 	)
 
 	r := router.NewRouter(config.SERVER_MODE_DEBUG)
