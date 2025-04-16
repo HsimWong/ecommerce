@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/HsimWong/ecommerce/internal/utils"
 	"github.com/spf13/viper"
 )
 
@@ -34,7 +35,6 @@ type Configuration struct {
 
 // Singleton config
 var AppConfig *Configuration
-var configuredFlag bool = false
 var once sync.Once
 
 func initConfig(configfile, configType string) {
@@ -60,6 +60,16 @@ func initConfig(configfile, configType string) {
 	}
 }
 
+func assert(condition bool) { utils.Assert(condition) }
+
+func (conf *Configuration) Validate() {
+	assert(len(conf.Server.Addr) > 0)
+	assert(conf.Server.Port <= 65535)
+	assert(len(conf.Database.Dbname) > 0)
+	assert(len(conf.Database.Host) > 0)
+	assert(conf.Database.Port < 65535)
+}
+
 func Config(configPath ...string) *Configuration {
 	once.Do(func() {
 		initConfig(func() string {
@@ -69,7 +79,6 @@ func Config(configPath ...string) *Configuration {
 				return configPath[0]
 			}
 		}(), configType)
-		configuredFlag = true
 	})
 
 	return AppConfig

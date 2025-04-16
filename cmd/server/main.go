@@ -9,6 +9,7 @@ import (
 
 func main() {
 	appConfig := config.Config()
+	appConfig.Validate()
 	logger.Log().Debug("Server will be started started at ",
 		zap.String("ServerAddr", appConfig.Server.Addr),
 		zap.Int("ServerPort", appConfig.Server.Port),
