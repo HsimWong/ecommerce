@@ -26,6 +26,7 @@ type Database struct {
 	Dbname       string
 	MaxOpenConns int
 	MaxIdleConns int
+	ConnTimeout  int
 }
 
 type Server struct {

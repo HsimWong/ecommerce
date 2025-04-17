@@ -9,4 +9,5 @@ database:
   dbname: myapp
   maxopenconns: 5
   maxidleconns: 25
+  conntimeout: 3
   
