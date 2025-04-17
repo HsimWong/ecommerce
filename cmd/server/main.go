@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/HsimWong/ecommerce/internal/config"
+	"github.com/HsimWong/ecommerce/internal/database"
 	"github.com/HsimWong/ecommerce/internal/router"
 	"github.com/HsimWong/ecommerce/pkg/logger"
 	"go.uber.org/zap"
@@ -19,7 +23,17 @@ func main() {
 	)
 
 	r := router.NewRouter(config.SERVER_MODE_DEBUG)
-	r.Run()
+	go r.Run()
+
+	db, err := database.InitPostgres(appConfig.GetDBConfig())
+	if err != nil {
+		logger.Log().Fatal("Database init failed", zap.Error(err))
+	}
+	for {
+		logger.Log().Info(fmt.Sprintf("%v", db.Ping()))
+		time.Sleep(5 * time.Second)
+	}
+
 	select {}
 
 }

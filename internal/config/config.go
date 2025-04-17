@@ -19,11 +19,13 @@ const (
 )
 
 type Database struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Dbname   string
+	Host         string
+	Port         int
+	Username     string
+	Password     string
+	Dbname       string
+	MaxOpenConns int
+	MaxIdleConns int
 }
 
 type Server struct {
