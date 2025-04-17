@@ -7,3 +7,7 @@ database:
   username: postgres
   password: DB_PASSWORD
   dbname: myapp
+  maxopenconns: 5
+  maxidleconns: 25
+  conntimeout: 3
+  
