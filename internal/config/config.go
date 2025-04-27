@@ -100,8 +100,11 @@ func Config(configPath ...string) *Configuration {
 	once.Do(func() {
 		initConfig(func() string {
 			if len(configPath) <= 0 {
-				return configFile
+				return ConfigFile
 			} else {
+				if len(configPath[0]) <= 0 {
+					return ConfigFile
+				}
 				return configPath[0]
 			}
 		}(), configType)

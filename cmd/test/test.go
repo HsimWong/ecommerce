@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-
-	"github.com/HsimWong/ecommerce/internal/config"
-	"github.com/HsimWong/ecommerce/internal/database"
-	"github.com/HsimWong/ecommerce/pkg/logger"
 )
 
 func TestUserRegister() {
@@ -24,14 +20,14 @@ func TestUserRegister() {
 }
 
 func TestDatabaseConn() {
-	cfg := config.Config("/home/ryan/ecommerce/configs/config.yaml")
-	dbconn := database.DBConn(cfg.GetDBConfig())
-	result, err := dbconn.Query("SELECT * FROM pg_catalog.pg_tables;")
-	if err != nil {
-		logger.Log().Error(err.Error())
-	}
+	// cfg := config.Config("/home/ryan/ecommerce/configs/config.yaml")
+	// dbconn := database.DBConn(cfg.GetDBConfig())
+	// result, err := dbconn.Query("SELECT * FROM pg_catalog.pg_tables;")
+	// if err != nil {
+	// 	logger.Log().Error(err.Error())
+	// }
 
-	logger.Log().Info(fmt.Sprintf("%v", result))
+	// logger.Log().Info(fmt.Sprintf("%v", result))
 	select {}
 }
 
